@@ -4,9 +4,14 @@
  */
 package Home;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import static java.awt.image.ImageObserver.ABORT;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import org.bson.Document;
 
 /**
  *
@@ -17,8 +22,21 @@ public class MainActivity extends javax.swing.JFrame {
     /**
      * Creates new form MainActivity
      */
+    DefaultTableModel model;
     public MainActivity() {
         initComponents();
+        loadData("");
+//        Object[] header = {"NO", "Nama Buku","Genre Buku","Harga Buku"};
+//        model = new DefaultTableModel(header, 0);
+//        tabelList.setModel(model);
+        tabelList.setRowHeight(30);
+        tabelList.getColumnModel().getColumn(0).setMinWidth(35);
+        tabelList.getColumnModel().getColumn(0).setMaxWidth(35);
+        tabelList.getColumnModel().getColumn(2).setMinWidth(150);        
+        tabelList.getColumnModel().getColumn(2).setMaxWidth(150);        
+        tabelList.getColumnModel().getColumn(3).setMinWidth(130);
+        tabelList.getColumnModel().getColumn(3).setMaxWidth(130);
+        
     }
 
     /**
@@ -43,7 +61,8 @@ public class MainActivity extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         searchBtn = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tabelList = new javax.swing.JTable();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -53,7 +72,7 @@ public class MainActivity extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("JetBrains Mono NL", 1, 18)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Stok Barang");
+        jLabel1.setText("ElingTugas");
 
         keluarbtn.setText("Keluar");
         keluarbtn.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -67,7 +86,7 @@ public class MainActivity extends javax.swing.JFrame {
             }
         });
 
-        addBtn.setText("Tambah Data");
+        addBtn.setText("Tambah Tugas");
         addBtn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 addBtnMousePressed(evt);
@@ -146,7 +165,7 @@ public class MainActivity extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(keluarbtn)
                     .addComponent(jButton2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(104, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 240, 470));
@@ -159,8 +178,18 @@ public class MainActivity extends javax.swing.JFrame {
                 searchBtnMousePressed(evt);
             }
         });
+        searchBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchBtnActionPerformed(evt);
+            }
+        });
+        searchBtn.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchBtnKeyReleased(evt);
+            }
+        });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tabelList.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -171,28 +200,44 @@ public class MainActivity extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        tabelList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tabelListMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tabelList);
+
+        jLabel2.setFont(new java.awt.Font("JetBrains Mono NL", 1, 18)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Jadwal Tugas Sekolah");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(searchBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 462, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 34, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1))
+                        .addContainerGap()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(searchBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 462, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
                 .addComponent(searchBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -259,6 +304,25 @@ public class MainActivity extends javax.swing.JFrame {
 
     }//GEN-LAST:event_searchBtnMousePressed
 
+    private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void tabelListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelListMouseClicked
+
+        
+    }//GEN-LAST:event_tabelListMouseClicked
+
+    private void searchBtnKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchBtnKeyReleased
+        
+        String key = searchBtn.getText();
+        if (key.isEmpty()) {
+            loadData("");
+        }else{
+            loadData(key);
+        }
+    }//GEN-LAST:event_searchBtnKeyReleased
+
     /**
      * @param args the command line arguments
      */
@@ -301,13 +365,42 @@ public class MainActivity extends javax.swing.JFrame {
     private javax.swing.JButton exportJson;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JButton keluarbtn;
     private javax.swing.JTextField searchBtn;
+    private javax.swing.JTable tabelList;
     // End of variables declaration//GEN-END:variables
+
+    void loadData(String key) {
+         try {
+            int no = 0;
+            model = new DefaultTableModel();
+            model.addColumn("No");
+            model.addColumn("Mata Pelajaran");
+            model.addColumn("Batas Pengumpulan");
+            model.addColumn("Progres");
+            tabelList.setModel(model);
+            MongoDatabase database = connect.sambungDB();
+            MongoCollection<Document> col = database.getCollection("tugas");
+//            MongoIterable<Document> data = coll.find();
+            MongoCursor<Document> cursor = col.find().iterator();
+            while (cursor.hasNext()) {
+                no++;
+                String mapel = cursor.next().get("mapel").toString();
+                String tgl = cursor.next().get("tgl_batas").toString();
+                String progres = cursor.next().get("progres").toString();
+                Object[] data = {no, mapel, tgl, progres};
+                int totalData = data.length-1;
+                model.addRow(data);
+                System.out.println(cursor.next().toJson());
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

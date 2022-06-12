@@ -28,7 +28,7 @@ public class connect {
         try {
             String uri = "mongodb://localhost:27017";
             MongoClient client = MongoClients.create(uri);
-            MongoDatabase database = client.getDatabase("produk");
+            MongoDatabase database = client.getDatabase("eling_db");
             System.out.println("Database Connected!");
             return database;
         } catch (Exception e) {
